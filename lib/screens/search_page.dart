@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:weather_app/providers/weather_provider.dart';
 import 'package:weather_app/services/weather_sevice.dart';
 
 import '../models/weather_model.dart';
 
-WeatherModel? weatherData;
-
 class SearchPage extends StatelessWidget {
   late String cityName;
-
-  VoidCallback? updateUi;
-  SearchPage({this.updateUi});
+  SearchPage({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,11 +20,17 @@ class SearchPage extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: TextField(
+            onChanged: (data) {
+              cityName = data;
+            },
             onSubmitted: (data) async {
-              WeatherModel weather =
+              WeatherModel? weather =
                   await WeatherService().getWeather(cityName: data);
-              weatherData = weather;
-              updateUi!();
+              Provider.of<WeatherProvider>(context, listen: false).weatherData =
+                  weather;
+              Provider.of<WeatherProvider>(context, listen: false).cityName =
+                  data;
+
               Navigator.pop(context);
             },
             decoration: InputDecoration(
@@ -35,7 +39,16 @@ class SearchPage extends StatelessWidget {
               hintText: "Enter a City",
               label: const Text("Search"),
               suffixIcon: IconButton(
-                onPressed: () {},
+                onPressed: () async {
+                  WeatherModel? weather =
+                      await WeatherService().getWeather(cityName: cityName);
+                  Provider.of<WeatherProvider>(context, listen: false)
+                      .weatherData = weather;
+                  Provider.of<WeatherProvider>(context, listen: false)
+                      .cityName = cityName;
+
+                  Navigator.pop(context);
+                },
                 icon: const Icon(
                   Icons.search,
                 ),

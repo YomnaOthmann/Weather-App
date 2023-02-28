@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:weather_app/models/weather_model.dart';
+import 'package:weather_app/providers/weather_provider.dart';
 import 'package:weather_app/screens/search_page.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  void updateUi() {
-    setState(() {});
-  }
-
+  WeatherModel? weatherData;
   @override
   Widget build(BuildContext context) {
+    weatherData = Provider.of<WeatherProvider>(context).weatherData;
     return Scaffold(
         appBar: AppBar(
           title: const Text('Weather App'),
@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SearchPage(updateUi: updateUi),
+                        builder: (context) => SearchPage(),
                       ));
                 },
                 icon: const Icon(
@@ -53,14 +53,14 @@ class _HomePageState extends State<HomePage> {
                 ),
               )
             : Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.deepOrangeAccent,
-                      Colors.orange,
-                      Colors.white,
+                      weatherData!.getThemeColor(),
+                      weatherData!.getThemeColor()[50]!,
+                      //Colors.white,
                     ],
                   ),
                 ),
@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> {
                       flex: 3,
                     ),
                     Text(
-                      "Cairo",
+                      Provider.of<WeatherProvider>(context).cityName ?? "",
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 32,
@@ -82,10 +82,10 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Text(
-                      " Updated:  18-02-2023",
+                      " Updated at: ${weatherData!.date}",
                       style: const TextStyle(
                         color: Colors.black,
-                        fontSize: 18,
+                        fontSize: 14,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -94,10 +94,10 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Image.asset(
-                          "assets/images/clear.png",
+                          weatherData!.getImage(),
                         ),
                         Text(
-                          "30",
+                          weatherData?.temp.toInt().toString() ?? "-",
                           style: const TextStyle(
                             color: Colors.black,
                             fontSize: 32,
@@ -105,9 +105,10 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "min temp: 17",
+                              "min temp: ${weatherData?.minTemp.toInt()}",
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 18,
@@ -115,7 +116,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             Text(
-                              "max temp: 35",
+                              "max temp: ${weatherData?.maxTemp.toInt()}",
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 18,
@@ -128,7 +129,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const Spacer(),
                     Text(
-                      "Clear",
+                      weatherData?.weatherStateName ?? "-",
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 32,
